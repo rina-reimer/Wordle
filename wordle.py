@@ -6,9 +6,6 @@ diction = list(
     ["which"])
 diction.append('which')
 
-global user_choice
-global stop
-
 # Called at the beginning, makes the 'wordle'
 def pick_word():
     global wordle
@@ -18,7 +15,6 @@ def pick_word():
 
 # How the user is asked for their guess
 def guess():
-    stop = False
     user_choice = input("Enter your guess: ").lower(
     )  # I converted it to .lower() to deal with different formatting that the user may use
     while user_choice not in diction:  #handles improper guesses
@@ -31,9 +27,10 @@ def guess():
             )
         else:
             user_choice = input("Not a word. Enter your guess: ")
+    return user_choice
 
 
-def convert_guess():
+def convert_guess(user_choice):
   global counter
   global repC
   global rep1C
@@ -50,7 +47,6 @@ def convert_guess():
       
   
   choiceL = [i for i in user_choice.upper()]
-  
   
   for i in range(5):
 # Right letter, right place
@@ -117,6 +113,8 @@ def gameplay():
   global counter
   global repC
   global rep1C
+  global stop
+  global user_choice
   print("""Rules of the game:
   Try to guess the 'Wordle', a random 5-letter word, in as few guesses as possible
   After every guess, your word will be evaluated 
@@ -130,19 +128,20 @@ def gameplay():
   counter = 0
   repC = ""
   rep1C = ""
-  guess()
+  stop = False
+  user_choice = guess()
   if stop:  # When 'reveal' is inputted, the game will end
     print("The correct word was " + wordle.upper())
   else:
-    convert_guess()
+    convert_guess(user_choice)
     while user_choice != wordle:  # The game will continue until the user guesses correctly
       print("")
-      guess()
+      user_choice = guess()
       if stop:
         print("The correct word was " + wordle.upper())
         break
       else:
-        convert_guess()
+        convert_guess(user_choice)
   if (user_choice.lower() != "reveal"):
     print("\nYou guessed correctly, good job!")
     print(repC)  
