@@ -9,10 +9,13 @@ class Wordle:
         self.diction.append('which')
         wordle_i = rand.randint(0, len(self.diction))
         self.wordle = self.diction[wordle_i]
+        self.word_dict = {}
+        for s in self.wordle:
+            if s in self.word_dict.keys():
+                self.word_dict[s.upper()] = self.word_dict.get(s)
+            else:
+                self.word_dict[s.upper()] = 1
         self.user_choice = ""     # changes at every guess
-        self.counter = 0
-        self.repC = ""
-        self.rep1C = ""
         self.stop = False
 
     # How the user is asked for their guess
@@ -28,62 +31,23 @@ class Wordle:
                 self.user_choice = input("Not a word. Enter your guess: ")
 
     def convert_guess(self):
-        ret = []
+        ret = ["_", "_", "_", "_", "_"]
         wordleL = [i for i in self.wordle.upper()]
-        repW = ""
-        rep1W = ""
-        for i in range(5):
-            if wordleL.count(self.wordle[i]):
-                if repW == wordleL[i]:
-                    rep1W = wordleL[i]
-                else:
-                    repW = wordleL[i]
         choiceL = [i for i in self.user_choice.upper()]
         for i in range(5):    # Right letter, right place
             if choiceL[i] == wordleL[i]:
-                ret.append("  " + choiceL[i] + "  ")
-                wordleL[i] = "0"
-            elif choiceL[i] in wordleL:   # Right letter, wrong place
-                if (repW == choiceL[i]) or (rep1W == choiceL[i]):
-                    if choiceL.count(choiceL[i]) == 2:
-                        if self.counter > 2:
-                            ret.append(" [" + choiceL[i] + "] ")
-                        else:
-                            ret.append(" (" + choiceL[i] + ") ")
-                            self.counter += 1
-                    else:
-                        ret.append(" (" + choiceL[i] + ") ")
-                elif (self.repC == choiceL[i]) or (self.rep1C == choiceL[i]):
-                    if self.repC == repW:
-                        if choiceL.count(choiceL[i]) == 2:
-                            if self.counter > 2:
-                                ret.append(" [" + choiceL[i] + "] ")
-                            else:
-                                ret.append(" (" + choiceL[i] + ") ")
-                                self.counter += 1
-                        else:
-                            ret.append(" [" + choiceL[i] + "] ")
-                    else:
-                        ret.append(" [" + choiceL[i] + "] ")
-                elif choiceL.count(choiceL[i]) > 1:
-                    to_add = True
-                    if self.repC == choiceL[i]:
-                        self.rep1C = choiceL[i]
-                    else:
-                        self.repC = choiceL[i]
-                    for j in range(5):    # Searches through the rest of the word to see if the letter matches anywhere
-                        if (choiceL[j] == wordleL[j]) and (j > i):
-                            to_add = False
-                    if to_add:  # If the letter doesn't match
-                        ret += " (" + choiceL[i] + ") "
-                        wordleL[i] = "0"
-                    else:
-                        ret += " [" + choiceL[i] + "] "
+                ret[i] = "  " + choiceL[i] + "  "
+                self.word_dict[wordleL[i]] = self.word_dict.get(wordleL[i]) - 1
+                wordleL[i] = "-"
+        for i in range(5):
+            if choiceL[i] in wordleL:   # Right letter, wrong place
+                if self.word_dict.get(choiceL[i]) != 0:
+                    ret[i] = " (" + choiceL[i] + ") "
+                    self.word_dict[wordleL[i]] = self.word_dict.get(wordleL[i]) - 1
                 else:
-                    ret += " (" + choiceL[i] + ") "
-                    wordleL[i] = "0"
-            else:   # Wrong letter
-                ret.append(" [" + choiceL[i] + "] ")
+                    ret[i] = " [" + choiceL[i] + "] "
+            elif wordleL[i] != "-":   # Wrong letter
+                ret[i] = " [" + choiceL[i] + "] "
         print(''.join(ret))  # Making the list into a string that can be printed
 
     def gameplay(self):
@@ -107,7 +71,8 @@ class Wordle:
                     print("The correct word was " + self.wordle.upper())
                     break
                 else:
-                    self.convert_guess(self.user_choice)
+                    self.convert_guess()
         if (self.user_choice.lower() != "reveal"):
             print("\nYou guessed correctly, good job!")
-            # print(self.repC)
+
+Wordle.gameplay(Wordle())
